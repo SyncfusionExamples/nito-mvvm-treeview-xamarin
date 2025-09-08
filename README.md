@@ -4,46 +4,19 @@ This repository demonstrates how to integrate and use the Nito.MVVM library with
 
 ## Sample
 
-### XAML
-```xaml
-<ContentPage.BindingContext>
-    <local:MusicInfoRepository x:Name="viewModel"/>
-</ContentPage.BindingContext>
-<ContentPage.Content>
-    <StackLayout>
-        <sfTreeView:SfTreeView x:Name="treeView" Indentation="15" ExpanderWidth="40" LoadOnDemandCommand="{Binding TreeViewOnDemandCommand}" ItemsSource="{Binding Menu}">
-        </sfTreeView:SfTreeView>
-    </StackLayout>
-</ContentPage.Content>
-```
-
 ### ViewModel
 ```csharp
+using Nito.Mvvm;
+
 public class MusicInfoRepository
 {
 
-    private ObservableCollection<MusicInfo> menu;
-
-    public ObservableCollection<MusicInfo> Menu
-    {
-        get { return menu; }
-        set { menu = value; }
-    }
     public IAsyncCommand TreeViewOnDemandCommand { get; set; }
 
     public MusicInfoRepository()
     {
         this.Menu = this.GetMenuItems();
         TreeViewOnDemandCommand = new CustomAsyncCommand(ExecuteOnDemandLoading, CanExecuteOnDemandLoading);
-    }
-
-    private bool CanExecuteOnDemandLoading(object sender)
-    {
-        var hasChildNodes = ((sender as TreeViewNode).Content as MusicInfo).HasChildNodes;
-        if (hasChildNodes)
-            return true;
-        else
-            return false;
     }
 
     private async Task ExecuteOnDemandLoading(object obj)
@@ -53,21 +26,8 @@ public class MusicInfoRepository
         if(notifyTask.IsCompleted)
         {
             var items = notifyTask.Result as IEnumerable<MusicInfo>;
-            if (items.Count() > 0)
-                //Expand the node after child items are added.
-                (obj as TreeViewNode).IsExpanded = true;
+            //...
         }
-    }
-
-    private ObservableCollection<MusicInfo> GetMenuItems()
-    {
-        ObservableCollection<MusicInfo> menuItems = new ObservableCollection<MusicInfo>();
-        menuItems.Add(new MusicInfo() { ItemName = "Discover Music", HasChildNodes = true, ID = 1 });
-        menuItems.Add(new MusicInfo() { ItemName = "Sales and Events", HasChildNodes = true, ID = 2 });
-        menuItems.Add(new MusicInfo() { ItemName = "Categories", HasChildNodes = true, ID = 3 });
-        menuItems.Add(new MusicInfo() { ItemName = "MP3 Albums", HasChildNodes = true, ID = 4 });
-        menuItems.Add(new MusicInfo() { ItemName = "Fiction Book Lists", HasChildNodes = true, ID = 5 });
-        return menuItems;
     }
 }
 ```
